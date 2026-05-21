@@ -10,33 +10,33 @@ It encodes/decodes 32-bit instructions, handles labels, branches, pseudo-instruc
 
 # File Structure
 
-. asm.c               # Two-pass assembler source
+. asm.c               - Two-pass assembler source
 
-. emu.c               # Emulator source
+. emu.c               - Emulator source
 
-. claims.txt          # Declaration of authorship
+. claims.txt          - Declaration of authorship
 
-. bubble_sort.asm     # Bubble sort on 8-element array
+. bubble_sort.asm     - Bubble sort on 8-element array
 
-. factorial.asm       # Iterative factorial (n=5)
+. factorial.asm       - Iterative factorial (n=5)
 
-. fibonacci.asm       # Iterative Fibonacci (N=10)
+. fibonacci.asm       - Iterative Fibonacci (N=10)
 
-. sum.asm             # Sum of array elements
+. sum.asm             - Sum of array elements
 
-. triangle.asm        # Recursive triangle numbers
+. triangle.asm        - Recursive triangle numbers
 
-. test01.asm          # Valid program — unused label + infinite loop
+. test01.asm          - Valid program — unused label + infinite loop
 
-. test02.asm          # Error-detection test (11 errors expected)
+. test02.asm          - Error-detection test (11 errors expected)
 
-. test03.asm          # SET pseudo-instruction test
+. test03.asm          - SET pseudo-instruction test
 
-. *.o                 # Binary object files (assembler output)
+. .o                 - Binary object files (assembler output)
 
-. *.lst               # Listing files (assembler output)
+. .lst               - Listing files (assembler output)
 
-. *.log               # Error/warning log files (assembler output)
+. .log               - Error/warning log files (assembler output)
 
 # How to Build
 
