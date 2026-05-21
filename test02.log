@@ -1,0 +1,19 @@
+ERROR   line 8: duplicate label 'label'
+ERROR   line 10: invalid operand '08ge'
+ERROR   line 11: 'ldc' requires an operand
+ERROR   line 12: 'add' takes no operand (found '5')
+ERROR   line 13: unexpected text after operand: ', 6; extra on end of line '
+ERROR   line 14: invalid label name '0def'
+ERROR   line 15: unknown mnemonic 'fibble'
+ERROR   line 16: unknown mnemonic '0def'
+ERROR   line 9: undefined label 'nonesuch'
+ERROR   line 10: invalid operand '08ge'
+ERROR   line 11: 'ldc' requires an operand
+ERROR   line 12: 'add' takes no operand (found '5')
+ERROR   line 13: unexpected text after operand: ', 6; extra on end of line '
+ERROR   line 14: invalid label name '0def'
+ERROR   line 15: unknown mnemonic 'fibble'
+ERROR   line 16: unknown mnemonic '0def'
+WARNING line 0: label 'label' defined but never used
+
+--- 16 error(s), 1 warning(s) ---

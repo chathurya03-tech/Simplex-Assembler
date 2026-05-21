@@ -1,0 +1,208 @@
+Name        : E V Sai Chathurya
+Roll No.    : 2401CS84
+
+DECLARATION OF AUTHORSHIP
+
+I confirm that the work submitted - asm.c, emu.c, all test .asm files, and this claims.txt - is entirely my own.
+I have not copied code from any other student or external source except where explicitly stated. 
+All programs were written, tested, and debugged by me.
+
+COMPILATION
+
+Both programs compile cleanly with no errors or warnings using:
+
+    gcc -o asm asm.c
+    gcc -o emu emu.c
+
+SUBMITTED FILES
+
+  asm.c             Two-pass assembler for the SIMPLEX instruction set
+  emu.c             Emulator for the SIMPLEX instruction set
+  claims.txt        This file
+
+  Test01.asm        Valid program - unused label, infinite loop
+  Test02.asm        Error-detection test (deliberate errors)
+  Test03.asm        SET pseudo-instruction test
+  Triangle.asm      Triangle numbers using recursion (from spec)
+  Bubble_Sort.asm   Bubble sort of { 64,25,12,87,3,45,78,19 }  N=8
+  factorial.asm     Iterative loop  (n = 5) , computes factorial of 5
+  fibonacci.asm     Nth Fibonacci number (iterative)  N=10
+  sum.asm           Sum of array elements { 10,20,30,40,50 }  N=5
+
+ASSEMBLER  (asm.c)
+
+Two-pass assembly using a single do_pass() routine called twice:
+
+        Pass 1  (do_pass(src, 1)) - label scan
+          - Scans every source line
+          - Records each label in the label table at its current PC value
+          - Handles SET: assigns a constant value to the label on that line
+          - Advances PC for every word-emitting instruction
+          - Does NOT emit code; does NOT error on undefined labels
+            (forward references are resolved in pass 2)
+          - Reports: duplicate labels, invalid label names, unknown
+            mnemonics, missing operands, extra operands
+
+        Pass 2  (do_pass(src, 2)) - code generation
+          - Resolves all operands; undefined labels are a hard error
+          - Encodes each instruction into a 32-bit word stored in obj_code[]
+
+All 19 SIMPLEX instructions correctly encoded
+        Instruction word layout:
+          bits  7..0  = opcode  (8-bit unsigned)
+          bits 31..8  = operand (24-bit signed two's complement)
+
+PC-relative branch offsets:  offset = target_address - (PC + 1)
+        because the spec states PC is incremented BEFORE the instruction acts
+
+Pseudo-instruction  data  - emits a raw 32-bit word into object code
+Pseudo-instruction  SET   - assigns a constant to a label at assembly
+        time; emits no code word
+
+Forward label references resolved correctly in pass 2
+
+Error detection and reporting (written to stderr and .log file):
+        - Unknown mnemonic
+        - Duplicate label definition
+        - Invalid label name  (e.g. starting with a digit: "0def:")
+        - Missing operand for instructions that require one
+        - Unexpected operand for instructions that take none
+        - Extra text after the operand (before any comment)
+        - Undefined label reference (pass 2)
+        - Invalid operand (neither a valid number nor a valid label name,
+          e.g. "08ge")
+
+Warning for labels that are defined but never referenced
+
+Three output files generated (same base name as the source):
+        .o   -- binary object file (consecutive little-endian 32-bit words)
+        .lst -- listing file (address + hex word + mnemonic + operand)
+        .log -- all errors and warnings
+
+Listing file features:
+        - Each instruction line: XXXXXXXX YYYYYYYY  mnemonic [operand]
+        - Label lines:           XXXXXXXX label:
+        - Symbolic operand display (label names shown where possible)
+        - Unused-label warnings at the bottom of the listing
+
+Numeric operand formats: decimal, 0x hexadecimal, 0 octal (via strtol)
+Case-insensitive mnemonic matching
+Portable C11 -- no platform-specific extensions used
+
+EMULATOR  (emu.c)
+
+All 19 SIMPLEX instructions correctly executed
+Four CPU registers: A (accumulator), B (second register), PC, SP
+32-bit signed integer arithmetic throughout
+PC-relative branch evaluation
+        (PC is incremented before the branch offset is applied, per spec)
+Loads binary object file (.o) produced by the assembler
+        reads consecutive 4-byte little-endian words into mem[]
+Memory: 4096 addressable 32-bit words  (MEM_SIZE = 4096)
+Bounds-checked memory access on every ldl, stl, ldnl, stnl
+        prints RUNTIME ERROR and exits if address is out of range
+Instruction limit (10,000,000) to detect runaway / infinite-loop programs
+PC bounds check -- RUNTIME ERROR if PC falls outside loaded program range
+
+Final state report on HALT:
+        "HALT at word address N"
+        "Final state:  A=  B=  SP=  PC="
+        "Instructions executed: N"
+All output is plain ASCII - compatible with Windows CMD 
+
+TEST RESULTS
+All eight test programs were assembled and executed successfully.
+
+Test01.asm  -  Valid program with unused label and infinite loop
+
+Assembler : 0 errors, 1 warning
+Warning   : label 'label' defined but never used
+Emulator  : Correctly hits the 10,000,000 instruction limit and reports
+            "possible infinite loop"  (br loop branches to itself --
+            this is the expected behaviour for Test01)
+
+
+Test02.asm  -  Error detection
+
+Assembler : 11 errors, 1 warning  (no .o produced -- correct)
+Errors detected:
+  Pass 1:
+    line  7  duplicate label 'label'
+    line 10  'ldc' requires an operand
+    line 11  'add' takes no operand (found '5')
+    line 12  unexpected text after operand: ', 6'
+    line 13  invalid label name '0def'
+    line 14  unknown mnemonic 'fibble'
+    line 15  unknown mnemonic '0def'
+  Pass 2:
+    line  8  undefined label 'nonesuch'
+    line  9  invalid operand '08ge'
+    line 12  unexpected text after operand: ', 6'
+    line 13  invalid label name '0def'
+  Warning:   label 'label' defined but never used
+
+
+Test03.asm  -  SET pseudo-instruction
+
+Assembler : 0 errors, 0 warnings
+Object    : 2 words
+Result    : val SET 75, val2 SET 66
+            ldc val loads 75 into A; adc val2 adds 66; A = 141
+
+
+Triangle.asm  -  Triangle numbers (recursive, from spec)
+
+Assembler : 0 errors, 0 warnings
+Object    : 76 words
+Emulator  : HALT at word address 9
+            Final state:  A=0  B=0  SP=4096  PC=10
+            Instructions executed: 47654
+            Computes triangle(n) for n = 0..9 (count=10)
+
+
+Bubble_Sort.asm  -  Bubble Sort
+
+Assembler : 0 errors, 0 warnings
+Object    : 77 words
+Emulator  : HALT at word address 5
+            Final state:  A=0  B=0  SP=4096  PC=6
+            Instructions executed: 1183
+Input     : { 64, 25, 12, 87, 3, 45, 78, 19 }  N=8
+Output    : { 3, 12, 19, 25, 45, 64, 78, 87 }  (ascending order)
+Algorithm : O(N^2) bubble sort; two nested loops; swaps adjacent
+            out-of-order pairs using the stnl register convention
+
+factorial.asm  -  Iterative loop
+
+Assembler : 0 errors, 0 warnings
+Emulator  : HALT  A = 16
+Description: Iterative loop from n=5 down to 1.
+             Each iteration: result = result + n
+             Computes 1 + 5 + 4 + 3 + 2 + 1 = 16
+
+fibonacci.asm  -  Nth Fibonacci number (iterative)
+
+Assembler : 0 errors, 0 warnings
+Object    : 37 words
+Emulator  : HALT at word address 7
+            Final state:  A=55  B=36  SP=4096  PC=8
+            Instructions executed: 125
+Input     : N = 10
+Expected  : fib(10) = 55  -  CORRECT
+Algorithm : Iterative. Stack slots a=0, b=1; loops N-1 times.
+            Core 5-instruction update using the stl register trick:
+              ldl 4  =>  A=b
+              ldl 3  =>  A=a,   B=b    (old b saved in B)
+              add    =>  A=a+b, B=old_b
+              stl 4  =>  mem[SP+4]=new_b;  A becomes old_b
+              stl 3  =>  mem[SP+3]=old_b   (= new_a)
+
+sum.asm  -  Sum of array elements
+
+Assembler : 0 errors, 0 warnings
+Object    : 44 words
+Emulator  : HALT at word address 5
+            Final state:  A=43  SP=4096
+            Instructions executed: 116
+Input     : { 10, 20, 30, 40, 50 }  N=5
+Result    : sum = 150  (stored in result memory word)

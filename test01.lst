@@ -1,0 +1,13 @@
+00000000 label:
+00000000 ldc
+00000001 ldc
+00000002 ldc
+00000003 loop:
+00000003 br
+00000004 br
+00000005 next:
+00000005 ldc
+00000006 ldc
+00000007 var1:
+00000007 data
+; WARNING: label 'label' defined but never used
